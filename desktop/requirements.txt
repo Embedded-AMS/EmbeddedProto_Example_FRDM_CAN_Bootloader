@@ -1,2 +1,2 @@
 python-can[gs_usb]
-protobuf==4.21.6
+protobuf==7.35.1

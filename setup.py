@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2020-2024 Embedded AMS B.V. - All Rights Reserved
+# Copyright (C) 2020-2026 Embedded AMS B.V. - All Rights Reserved
 #
 # This file is part of Embedded Proto.
 #
@@ -44,7 +44,7 @@ CRED = '\33[91m'
 CYELLOW = '\33[93m'
 CEND = '\33[0m'
 
-print("Update the submodule Embedded Proto before importing its setup script.", end='')
+print("Update the submodule Embedded Proto before importing its install script.", end='')
 try:
     result = subprocess.run(["git", "submodule", "init"], check=False, capture_output=True)
     if result.returncode:
@@ -69,7 +69,7 @@ except Exception as e:
     print("Error: " + str(e), file=stderr)
     exit(1)
         
-from EmbeddedProto import setup as EPSetup
+from EmbeddedProto import install as EPInstall
 
 
 ####################################################################################
@@ -111,43 +111,29 @@ def setup_desktop_script():
 
 def generate_source_code():
 
+    # The embeddedproto command lives in the virtual environment of the submodule. It runs the protobuf compiler
+    # which came with the package and adds the plugin and the folder with the custom options file for you. It
+    # generates the Python code for the desktop script as well.
+
     print("Generate the source file based on netbooting.proto.", end='')
     try:
-        os.chdir("EmbeddedProto")
-
-        command = ["protoc", "-I./generator", "--python_out=./generator/EmbeddedProto", 
-                   "./generator/embedded_proto_options.proto"]
-        result = subprocess.run(command, check=False, capture_output=True)
-        if result.returncode:
-            print(" [" + CRED + "Fail" + CEND + "]")
-            print(result.stderr.decode("utf-8"), end='', file=stderr)
-            exit(1)
-        
-        command = ["protoc", "-I../proto", "-I./generator/", "-I./generator/EmbeddedProto",
-                   "--eams_out=../frdm-ke06z/generated", 
-                   "../proto/netbooting.proto"]
         if "Windows" == platform.system():
-            command.append("--plugin=protoc-gen-eams=protoc-gen-eams.bat")
+            embeddedproto = os.path.join("EmbeddedProto", "venv", "Scripts", "embeddedproto.exe")
         else:
-            command.append("--plugin=protoc-gen-eams=protoc-gen-eams")
-            
+            embeddedproto = os.path.join("EmbeddedProto", "venv", "bin", "embeddedproto")
+
+        command = [embeddedproto, "-I./proto", "--eams_out=./frdm-ke06z/generated",
+                   "--python_out=./desktop/generated", "./proto/netbooting.proto"]
+
         result = subprocess.run(command, check=False, capture_output=True)
         if result.returncode:
             print(" [" + CRED + "Fail" + CEND + "]")
             print(result.stderr.decode("utf-8"), end='', file=stderr)
             exit(1)
-            
-        os.chdir("..")
-            
-        result = subprocess.run(["protoc", "-I./proto", "-I./EmbeddedProto/generator", "--python_out=./desktop/generated", 
-                                 "./proto/netbooting.proto"], check=False, capture_output=True)
-        if result.returncode:
-            print(" [" + CRED + "Fail" + CEND + "]")
-            print(result.stderr.decode("utf-8"), end='', file=stderr)
-            exit(1)
         else:
-            # WORKAROUND
-            src_path = os.path.join(".", "EmbeddedProto", "generator", "EmbeddedProto", "embedded_proto_options_pb2.py")
+            # The desktop script needs the Python code of the custom options file which netbooting.proto imports.
+            # The install script of Embedded Proto generates it in the package folder of the submodule.
+            src_path = os.path.join(".", "EmbeddedProto", "EmbeddedProto", "embedded_proto_options_pb2.py")
             dest_path = os.path.join(".", "desktop", "generated", "embedded_proto_options_pb2.py")
             shutil.copy(src_path, dest_path)
             
@@ -178,11 +164,11 @@ if __name__ == "__main__":
                                                  "code in your project.")
 
     parser.add_argument("-g", "--generate", action="store_true", 
-                        help="Do not run the Embedded Proto setup. Only generate the source based on *.proto files. "
+                        help="Do not run the Embedded Proto install. Only generate the source based on *.proto files. "
                              "Use this after changing netbooting.proto.")
 
-    EPSetup.add_parser_arguments(parser)
-    EPSetup.display_feedback()
+    EPInstall.add_parser_arguments(parser)
+    EPInstall.display_feedback()
     args = parser.parse_args()
 
     # ---------------------------------------
@@ -219,7 +205,7 @@ if __name__ == "__main__":
         os.chdir("./EmbeddedProto")
         
         # Run the setup script of Embedded Proto it self.
-        EPSetup.run(args)
+        EPInstall.run(args)
         
         os.chdir("..")   
         
