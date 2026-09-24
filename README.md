@@ -7,7 +7,7 @@ Example in which Embedded Proto is used to do CAN net booting on a NXP FRDM-KE06
 
 Embedded Proto is a product of Embedded AMS B.V. For more information about Embedded Proto please visit [EmbeddedProto.com](https://EmbeddedProto.com).
 
-Copyrights 2020-2024 Embedded AMS B.V. Amsterdam, [www.EmbeddedAMS.nl](https://www.EmbeddedAMS.nl), [info@EmbeddedAMS.nl](mailto:info@EmbeddedAMS.nl)
+Copyrights 2020-2026 Embedded AMS B.V. Hoorn, [www.EmbeddedAMS.nl](https://www.EmbeddedAMS.nl), [info@EmbeddedAMS.nl](mailto:info@EmbeddedAMS.nl)
 
 
 # Introduction
@@ -17,7 +17,7 @@ This is an example showing how the NXP FRDM-KE06Z boots with firmware it receive
 
 Commands are sent from the PC to a USB to CAN converter which is connected to the FDRM-KE06Z.
 
-You can read the full tutorial [here]().
+You can read the full tutorial [here](https://embeddedproto.com/a-can-netbooting-example-with-embedded-proto/).
 
 # Requirements
 
@@ -25,19 +25,21 @@ You can read the full tutorial [here]().
 * MCUExpresso
 * USB to CAN adapter, like [this one](https://openlightlabs.com/collections/frontpage/products/canable-pro-isolated-usb-to-can-adapter)
 * Dupont cables
-* Embedded Proto version 3.4.1 (included as a submodule). The requirements of Embedded Proto are listed [here](https://github.com/Embedded-AMS/EmbeddedProto/blob/master/README.md).
+* Embedded Proto version 4.0.0 (included as a submodule). Its only requirement is Python 3.11 or newer, see the [installation instructions](https://embeddedproto.com/documentation/installation/).
 
 # Installation
 
-1. Install MCUXpresso if you have not already.
-2. Install the dependencies required by Embedded Proto. They are listed [here](https://github.com/Embedded-AMS/EmbeddedProto).
-3. Clone the repository and auto generate the protobuf files.
+1. Install MCUXpresso IDE if you have not already. The project was last built with version 11.10.0.
+2. Install Python 3.11 or newer, the only dependency of Embedded Proto.
+3. Clone the repository and auto generate the protobuf files. The setup script runs the install script of Embedded Proto, which creates a virtual environment in the submodule folder, and generates the source code for both the microcontroller and the desktop script with the `embeddedproto` command. Add `--installer uv` when you have [uv](https://docs.astral.sh/uv/) installed, it is a lot faster.
 
 ```shell
 git clone --recursive https://github.com/Embedded-AMS/EmbeddedProto_Example_FRDM_CAN_Bootloader.git 
 cd EmbeddedProto_Example_FRDM_CAN_Bootloader
 python3 setup.py
 ```
+
+The Embedded Proto library is header only and requires C++17. The project has the C++ language standard set to GNU++17.
 
 # Running the code
 
